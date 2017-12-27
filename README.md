@@ -1,23 +1,19 @@
-# echo
-基于websocket的消息订阅发布中心
-
 #echo message center
 ##HTTP RESTful API
 <pre>
-URL: /publish
+URL: /publish?channel=channel1&channel=channel2
 METHOD: POST
 REQUEST:
   PARAMS:NONE
   BODY:
   ---------------Body Format-------------------
-  channels : channel1,channel2,... \r\n
-  message : json
-    {
-      "code" : string //message code
-      ,"content" : json //message content
-      ,"publisher" : string //message publisher client id
-      ,"time" : datetime string //message send time, format '2016-01-01 10:10:10'
-    }
+  	----------------------------------------------------------------------------------------------------------------------
+	|											PROTOCOL HEADER										|   PROTOCOL BODY	 |			
+	----------------------------------------------------------------------------------------------------------------------
+	| FLAG | LENGTH | CHECKSUM | VERSION | COMMANDCODE | ERRORCODE | TEXTDATALENGTH | BINDATALENGTH | TEXTDATA | BINDATA |
+	----------------------------------------------------------------------------------------------------------------------
+	|  4B  |   4B   |    4B    |    4B   |     4B      |     4B    |       4B       |      4B       |  Unknown | Unknown |
+	----------------------------------------------------------------------------------------------------------------------
   ------------------------------------------------
 RESPONSE:
   BODY:
@@ -69,12 +65,12 @@ Publish message to channels:
 command : publish \r\n
 \r\n
 channels : channel1,channel2,... \r\n
-message : json
-  {
-    "code" : string //message code
-    ,"content" : json //message content
-    ,"publisher" : string //message publisher client id
-    ,"time" : datetime string //message send time, format '2016-01-01 10:10:10'
-  }
+----------------------------------------------------------------------------------------------------------------------
+|											PROTOCOL HEADER										|   PROTOCOL BODY	 |			
+----------------------------------------------------------------------------------------------------------------------
+| FLAG | LENGTH | CHECKSUM | VERSION | COMMANDCODE | ERRORCODE | TEXTDATALENGTH | BINDATALENGTH | TEXTDATA | BINDATA |
+----------------------------------------------------------------------------------------------------------------------
+|  4B  |   4B   |    4B    |    4B   |     4B      |     4B    |       4B       |      4B       |  Unknown | Unknown |
+----------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------
 </pre>

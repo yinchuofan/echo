@@ -48,7 +48,8 @@ func Unsubscribe(channel string, subcriber Subscriber) {
 
 // Publish publish message to channels
 func Publish(channel string, message string) {
-	log.Printf("publish channel: %v, message:\r\n %v", channel, message)
+	//log.Printf("publish channel: %v, message:\r\n %v", channel, message)
+	log.Printf("publish channel: %v \n", channel)
 	mapSubMutex.Lock()
 	defer mapSubMutex.Unlock()
 	if subList, ok := mapSubscriber[channel]; ok {

@@ -71,18 +71,18 @@ func processUnsubscribe(ws *WsHandler) {
 
 func processPublish(ws *WsHandler) {
 	/*
-	  ---------------Message Format-------------------
-	  command : publish \r\n
-	  \r\n
-	  channels : channel1,channel2,... \r\n
-	  message : json
-	    {
-	      "code" : string //message code
-	      ,"content" : json //message content
-	      ,"sender" : string //message sender client id
-	      ,"time" : datetime string //message send time, format '2016-01-01 10:10:10'
-	    }
-	  ------------------------------------------------
+		  ---------------Message Format-------------------
+		  command : publish \r\n
+		  \r\n
+		  channels : channel1,channel2,... \r\n
+		  	----------------------------------------------------------------------------------------------------------------------
+			|											PROTOCOL HEADER										|   PROTOCOL BODY	 |
+			----------------------------------------------------------------------------------------------------------------------
+			| FLAG | LENGTH | CHECKSUM | VERSION | COMMANDCODE | ERRORCODE | TEXTDATALENGTH | BINDATALENGTH | TEXTDATA | BINDATA |
+			----------------------------------------------------------------------------------------------------------------------
+			|  4B  |   4B   |    4B    |    4B   |     4B      |     4B    |       4B       |      4B       |  Unknown | Unknown |
+			----------------------------------------------------------------------------------------------------------------------
+		  ------------------------------------------------
 	*/
 	i := strings.Index(ws.message.body, "\r\n")
 	channelsLine := ws.message.body[:i]
@@ -94,8 +94,6 @@ func processPublish(ws *WsHandler) {
 		channelList := strings.Split(channels, ",")
 
 		message := ws.message.body[i+2:]
-		j := strings.Index(message, ":")
-		message = message[j+1:]
 
 		for _, v := range channelList {
 			Publish(v, message)

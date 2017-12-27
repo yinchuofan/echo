@@ -1,13 +1,14 @@
 package core
 
 import (
-	"golang.org/x/net/websocket"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/net/websocket"
 )
 
 var (
@@ -146,43 +147,33 @@ func QueryOnlineClients(w http.ResponseWriter, r *http.Request) {
 // PublishMessage publish message
 func PublishMessage(w http.ResponseWriter, r *http.Request) {
 	/*
-	  ---------------HTTP Body Format-------------------
-	  channels : channel1,channel2,... \r\n
-	  message : json
-	    {
-	      "code" : string //message code
-	      ,"content" : json //message content
-	      ,"sender" : string //message sender client id
-	      ,"time" : datetime string //message send time, format '2016-01-01 10:10:10'
-	    }
-	  ------------------------------------------------
+		URL: /publish?channel=channel1&channel=channel2
+		  ---------------HTTP Body Format-------------------
+		  	----------------------------------------------------------------------------------------------------------------------
+			|											PROTOCOL HEADER										|   PROTOCOL BODY	 |
+			----------------------------------------------------------------------------------------------------------------------
+			| FLAG | LENGTH | CHECKSUM | VERSION | COMMANDCODE | ERRORCODE | TEXTDATALENGTH | BINDATALENGTH | TEXTDATA | BINDATA |
+			----------------------------------------------------------------------------------------------------------------------
+			|  4B  |   4B   |    4B    |    4B   |     4B      |     4B    |       4B       |      4B       |  Unknown | Unknown |
+			----------------------------------------------------------------------------------------------------------------------
+		  ------------------------------------------------
 	*/
-	defer r.Body.Close()
-	body, _ := ioutil.ReadAll(r.Body)
-
-	bodyString := string(body)
-
-	log.Print("http publish message:\n", bodyString)
-
-	i := strings.Index(bodyString, "\r\n")
-	channelsLine := bodyString[:i]
-
-	strList := strings.Split(channelsLine, ":")
-
-	if len(strList) == 2 {
-		channels := strings.TrimSpace(strList[1])
-		channelList := strings.Split(channels, ",")
-
-		message := bodyString[i+2:]
-		j := strings.Index(message, ":")
-		message = message[j+1:]
-
-		for _, v := range channelList {
-			v = strings.TrimSpace(v)
-			Publish(v, message)
-		}
-		w.Write([]byte("success"))
-	} else {
+	channels := r.URL.Query()["channel"]
+	log.Print("http publish message to channels:", channels)
+	if len(channels) == 0 {
 		w.Write([]byte("error"))
 	}
+
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.Write([]byte("error"))
+	}
+
+	for _, v := range channels {
+		v = strings.TrimSpace(v)
+		Publish(v, string(body))
+	}
+
+	w.Write([]byte("success"))
 }
