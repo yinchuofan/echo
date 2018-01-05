@@ -2,6 +2,7 @@
 基于websocket的消息订阅发布中心
 
 #echo message center
+
 ##HTTP RESTful API
 <pre>
 URL: /publish
